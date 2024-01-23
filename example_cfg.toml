@@ -1,0 +1,21 @@
+
+# THIS CONFIG FILE IS EXAMPLE
+
+[cfg.main_app]
+port = 1400
+users_fs_path = "/ur/abs/path/to/users_fs"
+
+jwt_secret = "secret???"
+password_hash_secret = "secret???"
+
+
+[cfg.database]
+host = "localhost"
+port = 27017
+db_name = "tiny-cloud-db"
+password = "password???"
+
+
+[cfg.new_user]
+default_space_available = 10_000 # in MB
+default_user_img_name = "default-user-img.png"

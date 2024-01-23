@@ -1,0 +1,10 @@
+
+
+.venv
+.vscode
+USERS_FS
+cfg.toml
+poetry.lock
+
+src/__pycache__
+src/*/__pycache__

@@ -1,0 +1,27 @@
+
+
+
+mongodb -> tiny-cloud-db
+
+
+
+
+collections:
+  users
+  users-folders-structures
+
+
+
+
+users:
+  User[]
+
+
+
+users-folders-structures:
+  [
+    {
+      "where_key": {user_id}::{file_field}::/path/to/layer
+      "structure": FsEntity[]
+    }
+  ]

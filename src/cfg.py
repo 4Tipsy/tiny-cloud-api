@@ -7,7 +7,7 @@ from src.models.CfgModel import CfgModel
     
 
 def _load_cfg() -> dict:
-  with open("cfg.toml", "rb") as read_file:
+  with open("Config.toml", "rb") as read_file:
     toml = tomllib.load(read_file)
     return toml["cfg"]
 

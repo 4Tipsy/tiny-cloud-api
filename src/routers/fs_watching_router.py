@@ -38,7 +38,7 @@ class _GetFsLayerReq(BaseModel):
 class _GetFsLayerRes(BaseModel):
   """_response"""
   result: Literal["success"]
-  structure: List[FsEntityModel]
+  fs_layer: List[FsEntityModel]
 
 # ROUTER FUNCTION
 @router.post("/get-fs-layer", description="**(Auth needed)**")
@@ -54,7 +54,7 @@ def handle_get_fs_layer(request: _GetFsLayerReq,
 
   # try get fs layer from db
   try:
-    structure = DbController.get_fs_layer(user_id, request.file_field, request.abs_path_to_layer)
+    fs_layer_structure = DbController.get_fs_layer(user_id, request.file_field, request.abs_path_to_layer)
 
   # if failed
   except DbNotFoundException as e:
@@ -62,7 +62,7 @@ def handle_get_fs_layer(request: _GetFsLayerReq,
 
 
   # return 200
-  return {"result": "success", "structure": structure}
+  return {"result": "success", "fs_layer": fs_layer_structure}
 
 
 

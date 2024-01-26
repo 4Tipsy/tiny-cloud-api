@@ -1,0 +1,14 @@
+
+
+
+SOME-USERS-FS-FOLDER-U-CHOOSE-IN-CONFIG:
+
+
+
+    USER_FOLDER_{user_id}:
+
+        __mere__: ...user files...
+        __special__: ...user files...
+        __temporary__: ...user files...
+
+        ...other user related files (user img for example)...

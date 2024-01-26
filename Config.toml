@@ -1,7 +1,9 @@
 
+
+
 [cfg.main_app]
 port = 1400
-users_fs_path = "/home/qwerty/my-projects/tiny-cloud/USERS_FS"
+users_fs_path = "/home/qwerty/my-projects/tiny-cloud-api/USERS_FS"
 
 jwt_secret = "idontwannathinkhere"
 password_hash_secret = "idontwannathinkhere"

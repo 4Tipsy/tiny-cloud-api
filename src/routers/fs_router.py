@@ -98,7 +98,7 @@ def _upload_file_form(request: str = Form( description=_upload_file_form_desc ))
 @router.post("/upload-file", description="**(Auth needed)**")
 def handle_upload_file(request: _UploadFileReq=Depends(_upload_file_form),
                        user_id=Depends(auth),
-                       file: UploadFile = File(...)
+                       file: UploadFile = File( description="Please send `Content-Type` header as FastApi takes mime-type of file from there" )
                       ) -> _BaseRes:
 
   fs_entity_validated_rel_path = validate_fs_entity_path( _ValidateFsEntityPathReq_crutch( **request.model_dump()) ) # CRUTCH!

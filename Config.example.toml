@@ -2,7 +2,7 @@
 # THIS CONFIG FILE IS EXAMPLE
 
 [cfg.main_app]
-port = 1400
+port = 1234
 users_fs_path = "/ur/abs/path/to/users_fs"
 
 jwt_secret = "secret???"

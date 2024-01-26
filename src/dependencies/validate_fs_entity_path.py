@@ -41,10 +41,6 @@ def validate_fs_entity_path(request: _Req) -> str | HTTPException:
   
 
 
-  # check if path dirname = name
-  if os.path.basename(taken_path) != fs_entity.name:
-    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Given path should contain name of entity in the end")
-
 
 
   # check if path (or new_name) has inappropriate symbols
@@ -55,15 +51,21 @@ def validate_fs_entity_path(request: _Req) -> str | HTTPException:
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New name contains inappropriate symbols")
 
 
-  
-  # validate, aka del all '/' from str start (path never should be abs)
-  while len(taken_path) != 0:
 
-    if taken_path[0] == "/":
-      taken_path = taken_path[1:]
-    
-    else:
-      break
+  # check if path dirname = name
+  if os.path.basename(taken_path) != fs_entity.name:
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Given path should contain name of entity in the end")
+
+
+
+
+  
+  # validate, aka del '/' from str start (path never should be abs)
+  taken_path = taken_path[1:]
+
+  if taken_path[0] == "/":
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Why so many '/' at start of the path, cmon??' (\"{taken_path}\")")
+
 
   
 

@@ -3,7 +3,9 @@
 .venv
 .vscode
 USERS_FS
-cfg.toml
+
+Config.toml
+
 poetry.lock
 
 src/__pycache__

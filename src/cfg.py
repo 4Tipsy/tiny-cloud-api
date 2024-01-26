@@ -35,13 +35,13 @@ api_docs_main_text = """
   ### **Tiny-Cloud-API** is just a small FastApi app designed to *store* user files and provide easy way to *share* them around.
   ---
   
-  **[!]** Each user has 3 groups to store data in, so called `file_field` (`"mere"`, `"special"`, `"temporary"`).
+  **(!)** Each user has 3 groups to store data in, so called `file_field` (`"mere"`, `"special"`, `"temporary"`).
 
-  **[!]** Errors not related to the validation of the request, although marked with the code `400`, may return other codes (`401`, `403`, `...`), nevertheless, their body remains indelibly typed.
+  **(!)** Errors not related to the validation of the request, although marked with the code `400`, may return other codes (`401`, `403`, `...`), nevertheless, their body remains indelibly typed.
 
-  **[!]** I don't store raw passwords! Only hashed ones, only security. (And i promise not to spam on your email).
+  **(!)** I don't store raw passwords! Only hashed ones. (And i promise not to spam on your email).
 
-  **[!]** Some (many) requests require user authentication. Currently, i use authentication via `JWT`, which are transmitted with cookies. In requests requiring it, this is indicated in the description.
+  **(!)** Some (many) requests require user authentication. Currently, i use authentication via `JWT`, which are transmitted with cookies (`a-token` cookie). In requests requiring it, this is indicated in the description.
 
   ---
   My GitHub: [link!][my-github]  

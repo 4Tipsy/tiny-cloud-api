@@ -45,7 +45,7 @@ class UserController:
 
 
   @staticmethod
-  def create_new_user(user_email, password, user_name):
+  def create_new_user(user_email, password, user_name) -> None | HTTPException:
     
     hashed_password = HashingPassword.get_hashed_password(password)
 

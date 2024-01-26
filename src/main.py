@@ -2,7 +2,7 @@
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from pydantic import BaseModel
@@ -76,10 +76,10 @@ app.include_router(utils_router)
 # 404
 @app.exception_handler(404)
 async def not_found_exception_handler(request: Request, exc: HTTPException) -> str:
-  return JSONResponse(
-      status_code=404,
-      content={'result': 'error', 'error': '404'}
-    )
+  return FileResponse(
+    path="src/utils/_files/404.html",
+    status_code=404
+  )
 
 # error response
 @app.exception_handler(HTTPException)

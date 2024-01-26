@@ -20,3 +20,19 @@ class UserModel(BaseModel):
 
   used_space: float
   available_space: float
+
+
+
+
+
+class UserInRespModel(BaseModel):
+
+  verified: bool
+
+  user_id: int  
+  user_name: str
+
+  user_email: str
+
+  used_space: float
+  available_space: float

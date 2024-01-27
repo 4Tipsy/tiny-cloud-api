@@ -113,7 +113,7 @@ class _DbController:
     user = self.get_user_by_id(user_id)
 
     if action == "+":
-      user.used_space + file_size_in_mb
+      user.used_space += file_size_in_mb
 
       if user.used_space > user.available_space:
         # abort operation
@@ -121,7 +121,7 @@ class _DbController:
 
 
     if action == "-":
-      user.used_space - file_size_in_mb
+      user.used_space -= file_size_in_mb
 
 
     # make record

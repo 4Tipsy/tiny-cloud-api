@@ -28,9 +28,9 @@ Cfg: CfgModel = CfgModel( **_load_cfg() )
 
 
 
-# texts
+# text at the start of docs page
 api_docs_main_text = """
-  ![img][uwu]
+  <img src="/api/utils-service/uwu" alt="uwu.png" style="background-color: #d0d0d0;">
 
   ### **Tiny-Cloud-API** is just a small FastApi app designed to *store* user files and provide easy way to *share* them around.
   ---
@@ -45,22 +45,20 @@ api_docs_main_text = """
 
   ---
   My GitHub: [link!][my-github]  
-  Source code: [link!][source-code]  
+  App's repo: [link!][source-code]  
   UwU: [link!][uwu]  
 
   ---
   [Swagger doc][doc-url]  
   [Redoc][redoc-url]  
   ---
-  API routes are below. You can make requests from wherever, whether it is `curl`, our [**cli app (not made yet...)**][get-cli] or something else! Have fun <3
+  API routes are below. You can make requests from wherever, whether it is `curl`, our [**cli app**][get-cli] or something else! Have fun <3
 
 
   [my-github]: https://github.com/4Tipsy
   [source-code]: https://github.com/4Tipsy/tiny-cloud-api
 
-  [uwu]: /api/utils-service/uwu
-
-  [get-cli]: #
+  [get-cli]: https://github.com/4Tipsy/tiny-cloud-cli
 
   [doc-url]: /api/docs
   [redoc-url]: /api/redoc

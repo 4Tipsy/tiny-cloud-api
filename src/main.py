@@ -4,7 +4,6 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.docs import get_swagger_ui_html
 from pydantic import BaseModel
 from typing import Literal
 
@@ -32,12 +31,12 @@ class OnErrorResModel(BaseModel):
 
 
 app = FastAPI(
-  docs_url="/api/docs", # check routers/docs.py
-  redoc_url="/api/redoc", # check routers/docs.py
+  docs_url="/api/docs",
+  redoc_url="/api/redoc",
   openapi_url="/api/open-api",
 
   title="Tiny Cloud API",
-  version="API 0.1.0",
+  version="API 0.9.9 pre-release",
   description=api_docs_main_text,
 
   responses={400: {'model': OnErrorResModel}},

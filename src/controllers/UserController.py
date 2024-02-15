@@ -65,7 +65,7 @@ class UserController:
       user = DbController.get_user_by_mail(user_email)
     # if not found the user
     except DbNotFoundException as e:
-      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password or mail is wrong")
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password or email is wrong")
 
 
     # check if password is valid
@@ -73,7 +73,7 @@ class UserController:
     is_password_valid = HashingPassword.check_if_password_valid(password, hashed_password_from_db)
     # if not valid
     if not is_password_valid:
-      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password or mail is wrong") 
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password or email is wrong") 
 
 
     # create jwt

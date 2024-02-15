@@ -169,6 +169,7 @@ class _DbController:
     
 
     # find needed entity
+    entity_to_return = None
     for ent in structure_keyed["structure"]:
       if ent["abs_path"] == abs_path_to_fs_entity:
         if ent["base_type"] == fs_entity_base_type:

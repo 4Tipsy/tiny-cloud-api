@@ -21,7 +21,8 @@ users:
 users-folders-structures:
   [
     {
-      "where_key": {user_id}::{file_field}::/path/to/layer
+      "where_key": [user_id, file_field, abs_path_to_folder]
       "structure": FsEntity[]
     }
+    ...
   ]

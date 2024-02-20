@@ -1,5 +1,6 @@
 
 from fastapi import HTTPException, status, UploadFile
+from typing import Generator, Tuple
 import os, shutil
 
 
@@ -94,7 +95,7 @@ class FileController():
 
 
   @staticmethod
-  def stream_download_file(fs_entity: FileModel, fs_entity_validated_rel_path, file_field, user_id) -> iter:
+  def stream_download_file(fs_entity: FileModel, fs_entity_validated_rel_path, file_field, user_id) -> Tuple[int, Generator[bytes, None, None]]:
         
     # construct full path
     full_path = FileController._construct_full_path(fs_entity_validated_rel_path, user_id, file_field)
@@ -104,5 +105,10 @@ class FileController():
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Such {fs_entity.base_type} does not exist")
 
     # STREAM file
-    with open(full_path, "rb") as stream_file:
-      yield stream_file.read()
+    def _gen():
+      with open(full_path, "rb") as stream_file:
+        yield stream_file.read()
+
+
+    size_in_b = os.path.getsize(full_path)
+    return (size_in_b, _gen()) # returned val

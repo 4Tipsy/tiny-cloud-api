@@ -1,8 +1,8 @@
 
-from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException, status
+from fastapi import APIRouter, Depends, File, UploadFile, Form, HTTPException, status, Header
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ValidationError
-from typing import Literal
+from typing import Literal, Union
 
 
 
@@ -49,7 +49,8 @@ def handle_create_folder(request: _CreateFolderReq,
   FolderController.create_folder(request.fs_entity, fs_entity_validated_rel_path, request.file_field, user_id)
   try:
     # try make record in db
-    DbController.edit_structure(user_id, request.file_field, request.fs_entity, action="add")
+    _fs_entity = FsEntityModel( **request.fs_entity.model_dump() ) # only used in DbController.edit_structure()!!!
+    DbController.edit_structure(user_id, request.file_field, _fs_entity, action="add")
     DbController.register_new_structure(user_id, request.file_field, request.fs_entity.abs_path)
 
   except Exception as e:
@@ -98,11 +99,15 @@ def _upload_file_form(request: str = Form( description=_upload_file_form_desc ))
 @router.post("/upload-file", description="**(Auth needed)**")
 def handle_upload_file(request: _UploadFileReq=Depends(_upload_file_form),
                        user_id=Depends(auth),
-                       file: UploadFile = File( description="Please send `Content-Type` header as FastApi takes mime-type of file from there" )
+                       file: UploadFile = File( description="Requires `Content-Type` header as FastApi takes mime-type of file from there" ),
+                       content_type: Union[str, None] = Header(default=None)
                       ) -> _BaseRes:
 
   fs_entity_validated_rel_path = validate_fs_entity_path( _ValidateFsEntityPathReq_crutch( **request.model_dump()) ) # CRUTCH!
   
+  if not content_type:
+    # if no Content-Type header
+    raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail="Please provide \"Content-Type\" header.")
 
 
   # fill fs_entity (cuz its file)

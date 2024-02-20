@@ -4,6 +4,8 @@
 [cfg.main_app]
 port = 1234
 users_fs_path = "/ur/abs/path/to/users_fs"
+hashed_links_len = 6
+max_folder_size_to_be_downloadable = 2_000 # in MB
 
 jwt_secret = "secret???"
 password_hash_secret = "secret???"

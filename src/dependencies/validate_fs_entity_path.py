@@ -52,7 +52,7 @@ def validate_fs_entity_path(request: _Req) -> str | HTTPException:
 
 
 
-  # check if path dirname = name
+  # check if path basename = name
   if os.path.basename(taken_path) != fs_entity.name:
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Given path should contain name of entity in the end")
 
@@ -60,7 +60,7 @@ def validate_fs_entity_path(request: _Req) -> str | HTTPException:
 
 
   
-  # validate, aka del '/' from str start (path never should be abs)
+  # del '/' from str start (path never should be abs)
   taken_path = taken_path[1:]
 
   if taken_path[0] == "/":

@@ -6,7 +6,7 @@ import datetime
 
 
 # modules
-from src.dependencies.auth import auth
+from src.dependencies.auth import auth, auth_with_unverified_user_allowed
 from src.models.UserModel import UserModel, UserInRespModel
 from src.controllers.UserController import UserController
 from src.controllers.DbController import DbController, DbNotFoundException
@@ -80,8 +80,8 @@ class _GetCurrentUserRes(BaseModel):
 
 # router function
 @router.get("/get-current-user", description="**(Auth needed)**")
-def handle_get_current_user(user_id=Depends(auth)) -> _GetCurrentUserRes:
-
+def handle_get_current_user(user_id = Depends(auth_with_unverified_user_allowed)) -> _GetCurrentUserRes:
+  
   try:
     user = DbController.get_user_by_id(user_id)
     user = UserInRespModel( **user.model_dump() )

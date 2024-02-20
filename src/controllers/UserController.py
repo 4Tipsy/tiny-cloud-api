@@ -35,7 +35,7 @@ class UserController:
 
     # copy default user img
     shutil.copyfile(
-      os.path.join("src/utils/_files", Cfg.new_user.default_user_img_name),
+      os.path.join("_data/files", Cfg.new_user.default_user_img_name),
       os.path.join(path_to_new_user_folder, Cfg.new_user.default_user_img_name) 
       )
 

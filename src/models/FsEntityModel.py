@@ -8,6 +8,7 @@ from typing import Literal, Optional
 class FsEntityModel(BaseModel):
     
   name: str
+  shared: bool = False
   abs_path: str
 
   base_type: Literal["folder", "file"]

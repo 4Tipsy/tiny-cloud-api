@@ -1,5 +1,4 @@
 
-
 import tomllib
 from src.models.CfgModel import CfgModel
 
@@ -13,12 +12,7 @@ def _load_cfg() -> dict:
 
 
 
-
-
-
-
-
-# config
+# CONFIG
 Cfg: CfgModel = CfgModel( **_load_cfg() )
 
 
@@ -29,7 +23,7 @@ Cfg: CfgModel = CfgModel( **_load_cfg() )
 
 
 # text at the start of docs page
-api_docs_main_text = """
+api_docs_main_text = f"""
   <img src="/api/utils-service/uwu" alt="uwu.png" style="background-color: #d0d0d0;">
 
   ### **Tiny-Cloud-API** is just a small FastApi app designed to *store* user files and provide easy way to *share* them around.
@@ -42,6 +36,8 @@ api_docs_main_text = """
   **(!)** I don't store raw passwords! Only hashed ones. (And i promise not to spam on your email).
 
   **(!)** Some (many) requests require user authentication. Currently, i use authentication via `JWT`, which are transmitted with cookies (`a-token` cookie). In requests requiring it, this is indicated in the description.
+
+  **(!)** You may download *and share* folders only up to `{Cfg.main_app.max_folder_size_to_be_downloadable} MB` size. It was made to avoid extra RAM usage, as downloading a folder requires it's pre-archiving...
 
   ---
   My GitHub: [link!][my-github]  

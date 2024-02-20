@@ -7,9 +7,9 @@ import os
 
 # modules
 from src.cfg import Cfg
-from src.models.UserModel import UserModel
+from src.models.UserModel import UserModel, SharedDictModel
 from src.models.FsEntityModel import FsEntityModel
-
+from src.utils.get_simple_hash import get_simple_hash
 
 
 
@@ -22,6 +22,8 @@ class DbNotFoundException(Exception):
 class AllAvailableSpaceUsedException(Exception):
   pass
 
+class SharedParamAlreadySetException(Exception):
+  pass
 
 
 
@@ -42,11 +44,91 @@ class _DbController:
   
 
 
+  #
+  # WORKING WITH USER.SHARED
+  #
+
+  def hashed_link_to_shared_dict(self, user_id: int, hashed_link: str) -> SharedDictModel | DbNotFoundException:
+
+    user = self.db["users"].find_one({"user_id": user_id})
+    user = UserModel( **user )
+
+    # find shared_dict we need
+    shared_dict = next(filter( lambda d: d.hashed_link==hashed_link, user.shared), None)
+
+    if not shared_dict:
+      raise DbNotFoundException
+    
+    return shared_dict
+
+
+
+  def entity_data_to_shared_dict(self, user_id: int, base_type: Literal["folder", "file"], abs_path_to_entity: str, file_field) -> SharedDictModel | DbNotFoundException:
+
+    user = self.db["users"].find_one({"user_id": user_id})
+    user = UserModel( **user )
+
+    # find shared_dict we need
+    shared_dict = next(filter(lambda d: (d.base_type==base_type and d.file_field==file_field and d.abs_path_to_entity==abs_path_to_entity), user.shared), None)
+
+    if not shared_dict:
+      raise DbNotFoundException
+    
+    return shared_dict
 
 
 
 
+  def register_new_shared(self, user_id: int, base_type: Literal["folder", "file"], abs_path_to_entity: str, file_field) -> str:
 
+    user = self.db["users"].find_one({"user_id": user_id})
+    user = UserModel( **user )
+
+    new_hashed_link = get_simple_hash(Cfg.main_app.hashed_links_len)
+
+    # get unique hashed_link
+    _unique = True
+    while True:
+
+      for idx, shared_dict in enumerate( user.shared ):
+
+        if shared_dict.hashed_link == new_hashed_link:
+          _unique = False
+
+          if idx <= 5:
+            # first 5 times, we try to regenerate the hashed_link
+            new_hashed_link = get_simple_hash(Cfg.main_app.hashed_links_len)
+          else:
+            # after 5 times
+            new_hashed_link += "B"
+          
+
+      # if never matched
+      if _unique:
+        break
+
+    # insert
+    new_shared_dict = SharedDictModel(hashed_link=new_hashed_link, base_type=base_type, file_field=file_field, abs_path_to_entity=abs_path_to_entity)
+    user.shared.append(new_shared_dict.model_dump())
+    self.db["users"].find_one_and_replace({"user_id": user_id}, user.model_dump())
+
+    return new_hashed_link # return hashed_link of new entity
+
+
+  def delete_shared_dict(self, user_id: int, hashed_link: str) -> None | DbNotFoundException:
+
+    user = self.db["users"].find_one({"user_id": user_id})
+    user = UserModel( **user )
+
+    new_user_shared = list(filter( lambda d: d.hashed_link != hashed_link , user.shared ))
+
+    # if was no d to delete
+    if user.shared == new_user_shared:
+      raise DbNotFoundException
+    
+    # save to db
+    user.shared = new_user_shared
+    self.db["users"].find_one_and_replace({"user_id": user_id}, user.model_dump())
 
 
 
@@ -73,6 +155,18 @@ class _DbController:
     """Will return user from db"""
 
     user = self.db["users"].find_one({"user_email": user_email})
+    if not user:
+      raise DbNotFoundException()
+
+
+    return UserModel( **user )
+  
+
+
+  def get_user_by_name(self, user_name: str) -> UserModel | DbNotFoundException:
+    """Will return user from db"""
+
+    user = self.db["users"].find_one({"user_name": user_name})
     if not user:
       raise DbNotFoundException()
 
@@ -145,7 +239,7 @@ class _DbController:
     """Get structure of given layer"""
 
     # get structure
-    where_key = f"{user_id}::{file_field}::{abs_path_to_layer}"
+    where_key = [user_id, file_field, abs_path_to_layer]
     structure_keyed = self.db["users-folders-structures"].find_one({"where_key": where_key})
 
     if not structure_keyed:
@@ -161,7 +255,7 @@ class _DbController:
 
     # get structure
     abs_path_to_layer = os.path.dirname(abs_path_to_fs_entity)
-    where_key = f"{user_id}::{file_field}::{abs_path_to_layer}"
+    where_key = [user_id, file_field, abs_path_to_layer]
     structure_keyed = self.db["users-folders-structures"].find_one({"where_key": where_key})
 
     if not structure_keyed:
@@ -192,6 +286,60 @@ class _DbController:
 
 
 
+  #
+  # CHANGING SHARED PARAM OF FS_ENTITY
+  #
+
+  def change_fs_entity_shared_param(self, user_id, file_field, abs_path_to_fs_entity, fs_entity_base_type, action: Literal["share", "unshare"]) -> None | SharedParamAlreadySetException | DbNotFoundException:
+    """Change fs_entity.shared"""
+
+    # get structure
+    abs_path_to_layer = os.path.dirname(abs_path_to_fs_entity)
+    where_key = [user_id, file_field, abs_path_to_layer]
+    structure_keyed = self.db["users-folders-structures"].find_one({"where_key": where_key})
+    structure = structure_keyed["structure"]
+
+    if not structure_keyed:
+      raise DbNotFoundException
+    
+
+    # find needed entity
+    entity_to_change_shared_param = None
+    for ent in structure:
+      if ent["abs_path"] == abs_path_to_fs_entity:
+        if ent["base_type"] == fs_entity_base_type:
+          entity_to_change_shared_param = ent
+
+    if not entity_to_change_shared_param:
+      raise DbNotFoundException
+    
+
+    # change fs_entity.shared
+    if action == "share":
+      # if already set
+      if entity_to_change_shared_param["shared"] == True:
+        raise SharedParamAlreadySetException
+
+      # set
+      entity_to_change_shared_param["shared"] = True
+
+
+
+    elif action == "unshare":
+      # if already set
+      if entity_to_change_shared_param["shared"] == False:
+        raise SharedParamAlreadySetException
+
+      # set
+      entity_to_change_shared_param["shared"] = False
+
+
+    # update structure
+
+    new_structure_keyed = {"where_key": where_key, "structure": structure}
+    self.db["users-folders-structures"].find_one_and_replace({"where_key": where_key}, new_structure_keyed)
+
+
 
 
 
@@ -206,7 +354,7 @@ class _DbController:
 
   def register_new_structure(self, user_id, file_field, abs_path_to_new_folder) -> None:
 
-    where_key = f"{user_id}::{file_field}::{abs_path_to_new_folder}"
+    where_key = [user_id, file_field, abs_path_to_new_folder]
     new_structure_keyed = {"where_key": where_key, "structure": []}
     self.db["users-folders-structures"].insert_one(new_structure_keyed)
 
@@ -215,7 +363,7 @@ class _DbController:
 
   def delete_structure(self, user_id, file_field, abs_path_to_layer) -> None:
 
-    where_key = f"{user_id}::{file_field}::{abs_path_to_layer}"
+    where_key = [user_id, file_field, abs_path_to_layer]
     self.db["users-folders-structures"].find_one_and_delete({"where_key": where_key})
 
 
@@ -227,7 +375,7 @@ class _DbController:
 
     # vars
     abs_path_to_layer = os.path.dirname( fs_entity.abs_path )
-    where_key = f"{user_id}::{file_field}::{abs_path_to_layer}"
+    where_key = [user_id, file_field, abs_path_to_layer]
 
 
     # get structure
@@ -255,10 +403,10 @@ class _DbController:
     # cuz when we rename folder, according structure.where_key should be updated as well
     if action == "rename" and fs_entity.base_type == "folder":
 
-      renamed_folder_where_key = f"{user_id}::{file_field}::{os.path.join(abs_path_to_layer, fs_entity.name)}"
+      renamed_folder_where_key = [user_id, file_field, abs_path_to_layer]
 
       _structure_keyed = self.db["users-folders-structures"].find_one_and_delete({"where_key": renamed_folder_where_key})
-      _structure_keyed["where_key"] = f"{user_id}::{file_field}::{os.path.join(abs_path_to_layer, new_name)}"
+      _structure_keyed["where_key"] = [user_id, file_field, abs_path_to_layer]
       self.db["users-folders-structures"].insert_one(_structure_keyed)
       
 
@@ -314,23 +462,22 @@ class _DbController:
 
 
     # fill new user obj
-    new_user = {
-      "verified": False,
-      "jwt_epoch": 1,
+    new_user = UserModel(
+      verified=False,
+      jwt_epoch=1,
+      user_id=user_id,
+      user_name=user_name,
+      user_img=Cfg.new_user.default_user_img_name,
+      user_email=user_email,
+      hashed_password=hashed_password,
+      shared=[],
+      used_space=0,
+      available_space=Cfg.new_user.default_space_available
+    )
 
-      "user_id": user_id,
-      "user_name": user_name,
-      "user_img": Cfg.new_user.default_user_img_name,
-
-      "user_email": user_email,
-      "hashed_password": hashed_password,
-
-      "used_space": 0,
-      "available_space": Cfg.new_user.default_space_available
-    }
 
     # write in db
-    self.db["users"].insert_one(new_user)
+    self.db["users"].insert_one(new_user.model_dump())
 
     # return the id
     return user_id

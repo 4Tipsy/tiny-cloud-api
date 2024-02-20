@@ -2,7 +2,7 @@
 from fastapi import Request, HTTPException, status
 from jwt.exceptions import InvalidTokenError
 import jwt
-
+from typing import Tuple
 
 
 # modules
@@ -15,8 +15,36 @@ from src.models.UserModel import UserModel
 
 
 
+
+
+
 def auth(request: Request) -> int | HTTPException:
-  """Takes jwt from cookies and tries to decode it. If ok returns user_id(decoded in jwt)"""
+  """Takes jwt from cookies and tries to decode it. If ok returns user_id(contains in jwt) | Will raise HTTPException if user is not verified"""
+
+  user_id, user_is_verified = _auth(request)
+  if not user_is_verified:
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not verified")
+  
+  return user_id
+
+
+def auth_with_unverified_user_allowed(request: Request) -> int | HTTPException:
+  """Takes jwt from cookies and tries to decode it. If ok returns user_id(contains in jwt) | Will NOT raise HTTPException if user is not verified"""
+  
+  user_id, user_is_verified = _auth(request)
+  return user_id
+
+
+
+
+
+
+
+
+
+
+def _auth(request: Request) -> Tuple[int, bool] | HTTPException:
+  """Takes jwt from cookies and tries to decode it. If ok returns user_id(contains in jwt)"""
 
 
 
@@ -45,9 +73,7 @@ def auth(request: Request) -> int | HTTPException:
   if current_user.jwt_epoch != a_token.jwt_epoch:
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid auth token')
   
-  if not current_user.verified:
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User is not verified")
   
 
   # if everything is ok
-  return a_token.user_id
+  return (a_token.user_id, current_user.verified)

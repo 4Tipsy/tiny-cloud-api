@@ -1,11 +1,14 @@
 
 from fastapi import HTTPException, status
-import os, shutil
+from typing import Generator, Tuple
+from tempfile import _TemporaryFileWrapper
+import os, shutil, tempfile
 
 
 # modules
 from src.models.FsEntityModel import FolderModel
 from src.cfg import Cfg
+from src.utils.FolderToTmpArchive import FolderToTempArchive
 
 
 
@@ -86,3 +89,34 @@ class FolderController():
 
     # delete folder
     shutil.rmtree(full_path)
+
+
+
+
+
+  @staticmethod
+  def stream_download_folder(fs_entity: FolderModel, fs_entity_validated_rel_path, file_field, user_id) -> Tuple[int, Generator[bytes, None, None]]:
+        
+    # construct full path
+    full_path = FolderController._construct_full_path(fs_entity_validated_rel_path, user_id, file_field)
+
+    # check if not exist
+    if os.path.isdir(full_path) == False:
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Such {fs_entity.base_type} does not exist")
+
+
+    # transform folder into temp archive
+    try:
+      temp_archive = FolderToTempArchive.archive(full_path)
+    except FolderToTempArchive._FolderTooLargeException:
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"The folder you try to download is too large, current size limit is {Cfg.main_app.max_folder_size_to_be_downloadable} MB.")
+
+    # STREAM file
+    def _gen():
+      with open(temp_archive.name, "rb") as stream_file:
+        yield stream_file.read()
+        temp_archive.close() # close this already!
+
+
+    size_in_b = os.path.getsize(temp_archive.name)
+    return (size_in_b, _gen()) # returned val

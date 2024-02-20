@@ -14,6 +14,8 @@ from src.routers.fs_router import router as fs_router
 from src.routers.fs_watching_router import router as fs_watching_router
 from src.routers.download_router import router as download_router
 from src.routers.user_router import router as user_router
+from src.routers.shared_router import router as shared_router
+from src.routers.share_route_router import router as share_route_router
 from src.routers.utils_router import router as utils_router
 
 
@@ -32,14 +34,15 @@ class OnErrorResModel(BaseModel):
 
 app = FastAPI(
   docs_url="/api/docs",
+  swagger_ui_parameters={"useUnsafeMarkdown": True},
   redoc_url="/api/redoc",
   openapi_url="/api/open-api",
 
   title="Tiny Cloud API",
-  version="API 0.9.9 pre-release",
+  version="API 1.0.0",
   description=api_docs_main_text,
 
-  responses={400: {'model': OnErrorResModel}},
+  responses={400: {'model': OnErrorResModel}}, # to be shown in schema
 )
 
 
@@ -62,8 +65,9 @@ app.include_router(fs_router)
 app.include_router(fs_watching_router)
 app.include_router(download_router)
 app.include_router(user_router)
+app.include_router(share_route_router)
+app.include_router(shared_router)
 app.include_router(utils_router)
-
 
 
 
@@ -76,7 +80,7 @@ app.include_router(utils_router)
 @app.exception_handler(404)
 async def not_found_exception_handler(request: Request, exc: HTTPException) -> str:
   return FileResponse(
-    path="src/utils/_files/404.html",
+    path="_data/files/404.html",
     status_code=404
   )
 

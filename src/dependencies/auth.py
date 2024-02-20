@@ -7,7 +7,7 @@ from typing import Tuple
 
 # modules
 from src.cfg import Cfg
-from src.controllers.DbController import DbController
+from src.controllers.DbController import DbController, DbNotFoundException
 from src.models.ATokenModel import ATokenModel
 from src.models.UserModel import UserModel
 
@@ -68,7 +68,10 @@ def _auth(request: Request) -> Tuple[int, bool] | HTTPException:
 
 
   # authenticate
-  current_user = DbController.get_user_by_id(a_token.user_id)
+  try:
+    current_user = DbController.get_user_by_id(a_token.user_id)
+  except DbNotFoundException:
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid auth token')
 
   if current_user.jwt_epoch != a_token.jwt_epoch:
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid auth token')

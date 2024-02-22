@@ -105,10 +105,10 @@ class FileController():
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Such {fs_entity.base_type} does not exist")
 
     # STREAM file
-    def _gen():
+    def file_stream_gen():
       with open(full_path, "rb") as stream_file:
         yield stream_file.read()
 
 
     size_in_b = os.path.getsize(full_path)
-    return (size_in_b, _gen()) # returned val
+    return (size_in_b, file_stream_gen()) # returned val

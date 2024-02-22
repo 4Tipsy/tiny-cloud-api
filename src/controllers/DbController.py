@@ -416,7 +416,14 @@ class _DbController:
     self.db["users-folders-structures"].find_one_and_replace({"where_key": where_key}, new_structure_keyed)
 
 
-
+    # if entity was deleted, fix user.shared
+    if action == "del":
+      if fs_entity.shared:
+        user = self.db["users"].find_one({"user_id": user_id})
+        user = UserModel( **user )
+        user.shared = list(filter( lambda d: not (d.abs_path_to_entity==fs_entity.abs_path and d.base_type==fs_entity.base_type), user.shared)) # del related shared_dict
+        
+        self.db["users"].find_one_and_replace({"user_id": user_id}, user.model_dump())
 
 
 

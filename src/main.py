@@ -39,7 +39,7 @@ app = FastAPI(
   openapi_url="/api/open-api",
 
   title="Tiny Cloud API",
-  version="API 1.0.0",
+  version="API 1.0.1",
   description=api_docs_main_text,
 
   responses={400: {'model': OnErrorResModel}}, # to be shown in schema

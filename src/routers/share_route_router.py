@@ -8,7 +8,7 @@ from pydantic import BaseModel, create_model
 from src.controllers.DbController import DbController, DbNotFoundException
 from src.controllers.FileController import FileController
 from src.controllers.FolderController import FolderController
-from src.models.FsEntityModel import FsEntityModel
+from src.models.FsEntityModel import FsEntityModel, FsEntityInShareModel
 from src.models.UserModel import SharedDictModel
 from src.dependencies.validate_fs_entity_path import validate_fs_entity_path
 
@@ -21,8 +21,8 @@ router = APIRouter(tags=["Shared service"])
 
 
 
-@router.get("/share/{user_name}/{hashed_link}")
-def handle_share(user_name: str, hashed_link: str) -> FsEntityModel:
+@router.get("/share/{user_name}/{hashed_link}", description="Will return 404 if no such {user_name}/{hashed_link} combination")
+def handle_share(user_name: str, hashed_link: str) -> FsEntityInShareModel:
   
   try:
     user = DbController.get_user_by_name(user_name)
@@ -31,12 +31,14 @@ def handle_share(user_name: str, hashed_link: str) -> FsEntityModel:
 
 
     if not fs_entity.shared:
+      # if entity is not shared already, but still in users.shared
       DbController.delete_shared_dict(user.user_id, hashed_link)
       raise HTTPException(404)
 
 
     # if ok
-    return fs_entity.model_dump(exclude_none=True)
+    fs_entity_in_share = FsEntityInShareModel( **fs_entity.model_dump() )
+    return fs_entity_in_share.model_dump(exclude_none=True, exclude_unset=True)
 
 
 
@@ -49,7 +51,7 @@ def handle_share(user_name: str, hashed_link: str) -> FsEntityModel:
 
 
 
-@router.get("/share/{user_name}/{hashed_link}/file")
+@router.get("/share/{user_name}/{hashed_link}/file", description="**File download!** | Will return 404 if no such {user_name}/{hashed_link} combination")
 def handle_share_download_file(user_name: str, hashed_link: str) -> bytes:
     
   try:
@@ -64,8 +66,8 @@ def handle_share_download_file(user_name: str, hashed_link: str) -> bytes:
 
 
     # if ok
-    _Model = create_model("_", fs_entity=(FsEntityModel, ...), new_name=(str, None)) # crutch!!!
-    fs_entity_validated_rel_path = validate_fs_entity_path( _Model(fs_entity=fs_entity) ) # crutch!!!
+    _EntityModel = create_model("_", fs_entity=(FsEntityModel, ...), new_name=(str, None)) # crutch!!!
+    fs_entity_validated_rel_path = validate_fs_entity_path( _EntityModel(fs_entity=fs_entity) ) # crutch!!!
 
     # # get file generator
     if fs_entity.base_type == "file":

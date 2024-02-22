@@ -1,7 +1,7 @@
 # Tiny Cloud API
 [this-cool-pink-color]: #FF005C
 
-<img src="https://github.com/4Tipsy/tiny-cloud-api/blob/main/src/utils/_files/uwu.png" alt="uwu.png">
+<img src="http://tiny-cloud.xyz/api/utils-service/uwu" alt="uwu.png">
 
 ---
 It's is a small REST API designed to *store* user files and provide easy way to *share* them around.  

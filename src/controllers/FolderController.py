@@ -112,11 +112,11 @@ class FolderController():
       raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"The folder you try to download is too large, current size limit is {Cfg.main_app.max_folder_size_to_be_downloadable} MB.")
 
     # STREAM file
-    def _gen():
+    def file_stream_gen():
       with open(temp_archive.name, "rb") as stream_file:
         yield stream_file.read()
         temp_archive.close() # close this already!
 
 
     size_in_b = os.path.getsize(temp_archive.name)
-    return (size_in_b, _gen()) # returned val
+    return (size_in_b, file_stream_gen()) # returned val

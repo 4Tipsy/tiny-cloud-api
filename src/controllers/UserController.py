@@ -37,7 +37,7 @@ class UserController:
     shutil.copyfile(
       os.path.join("_data/files", Cfg.new_user.default_user_img_name),
       os.path.join(path_to_new_user_folder, Cfg.new_user.default_user_img_name) 
-      )
+    )
 
 
 
@@ -51,7 +51,6 @@ class UserController:
 
     new_user_id = DbController.create_new_user(user_email, hashed_password, user_name)
     UserController._create_new_user_fs(new_user_id)
-
 
 
 

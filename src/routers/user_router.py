@@ -1,8 +1,9 @@
 
 from fastapi import APIRouter, Depends, File, UploadFile, Response, HTTPException, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Literal
-import datetime
+import datetime, os
 
 
 # modules
@@ -11,7 +12,7 @@ from src.models.UserModel import UserModel, UserInRespModel
 from src.controllers.UserController import UserController
 from src.controllers.DbController import DbController, DbNotFoundException
 from src.utils.validate_email import validate_email
-
+from src.cfg import Cfg
 
 
 
@@ -92,3 +93,19 @@ def handle_get_current_user(user_id = Depends(auth_with_unverified_user_allowed)
     "result": "success",
     "user": user.model_dump()
   }
+
+
+
+
+
+@router.get("/get-user-img", description="**(Auth needed)**")
+def handle_get_user_img(user_id = Depends(auth_with_unverified_user_allowed)) -> FileResponse:
+  try:
+    user = DbController.get_user_by_id(user_id)
+    user = UserModel( **user.model_dump() )
+    path_to_user_img = os.path.join(Cfg.main_app.users_fs_path, f'USER_FOLDER_{user_id}', user.user_img)
+
+    return FileResponse(path_to_user_img)
+
+  except DbNotFoundException as e:
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Invalid auth token')

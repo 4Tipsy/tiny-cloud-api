@@ -61,6 +61,8 @@ class FolderController():
 
   @staticmethod
   def rename_folder(fs_entity: FolderModel, fs_entity_validated_rel_path, file_field, user_id, new_name) -> None | HTTPException:
+
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Rn disabled, kill me plz, i hate my life")
     
     # construct full path
     full_path = FolderController._construct_full_path(fs_entity_validated_rel_path, user_id, file_field)
@@ -79,6 +81,8 @@ class FolderController():
 
   @staticmethod
   def delete_folder(fs_entity: FolderModel, fs_entity_validated_rel_path, file_field, user_id) -> None | HTTPException:
+
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Rn disabled, kill me plz, i hate my life")
         
     # construct full path
     full_path = FolderController._construct_full_path(fs_entity_validated_rel_path, user_id, file_field)

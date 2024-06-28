@@ -4,6 +4,7 @@
 [cfg.main_app]
 port = 1234
 users_fs_path = "/ur/abs/path/to/users_fs"
+web_static_path = "/ur/abs/path/to/web_static"
 hashed_links_len = 6
 max_folder_size_to_be_downloadable = 2_000 # in MB
 

@@ -3,6 +3,7 @@
 .venv
 .vscode
 USERS_FS
+WEB_STATIC
 
 Config.toml
 

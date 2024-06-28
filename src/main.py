@@ -3,7 +3,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.responses import JSONResponse, FileResponse
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Literal
 
@@ -46,17 +46,6 @@ app = FastAPI(
 )
 
 
-# cors
-app.add_middleware(
-  CORSMiddleware,
-  allow_origins=["*"],
-  allow_credentials=True,
-  allow_methods=["*"],
-  allow_headers=["*"],
-)
-
-
-
 
 
 
@@ -70,7 +59,7 @@ app.include_router(shared_router)
 app.include_router(utils_router)
 
 
-
+app.mount("/", StaticFiles(directory=Cfg.main_app.web_static_path), name="static")
 
 
 

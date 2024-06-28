@@ -6,6 +6,7 @@ from pydantic import BaseModel
 class _MainApp(BaseModel):
   port: int
   users_fs_path: str
+  web_static_path: str
   hashed_links_len: int
   max_folder_size_to_be_downloadable: int
 

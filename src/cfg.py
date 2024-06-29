@@ -1,14 +1,14 @@
 
-import tomllib
+import toml
 from src.models.CfgModel import CfgModel
 
 
     
 
 def _load_cfg() -> dict:
-  with open("Config.toml", "rb") as read_file:
-    toml = tomllib.load(read_file)
-    return toml["cfg"]
+  with open("Config.toml", "r") as read_file:
+    config_toml = toml.load(read_file)
+    return config_toml["cfg"]
 
 
 
